@@ -404,7 +404,7 @@ cfg_val! {
   /// See section Priority navigation mode in the integration manual.
   RateNavPrio,           0x20210004, u8,
 
-  // CFG-ODO-*
+  // Sensor Fusion Odometer CFG-SFODO-*
   /// Use odometer
   UseOdo, 0x10220001, bool,
   /// Use low-speed course over ground filter
@@ -423,7 +423,40 @@ cfg_val! {
   VelLpGain, 0x20220031, u8,
   /// Course over ground low-pass filter level (at speed < 8 m/s) -- Range is from 0 to 255.
   CogLpGain, 0x20220032, u8,
-  
+
+  // Sensor Fusion IMU configuration CFG-SFIMU-*
+  /// Time period between each update for the saved temperature-dependent gyroscope bias table
+  GyroTCUpdatePer, 0x30060007, u16,
+  /// Gyroscope sensor RMS threshold
+  GyroRmsThdl, 0x20060008, u8,
+  /// Nominal gyroscope sensor data sampling frequency
+  GyroFreq, 0x20060009, u8,
+  /// Gyroscope sensor data latency due to e.g. CANbus
+  GyroLatency, 0x3006000a, u16,
+  /// Gyroscope sensor data accuracy
+  GyroAcc, 0x3006000b, u16,
+  /// Accelerometer RMS threshold
+  AccelRmsThdl, 0x20060015, u8,
+  ///Nominal accelerometer sensor data sampling frequency
+  AccelFreq, 0x20060016, u8,
+  /// Accelerometer sensor data latency due to e.g. CAN bus
+  AccelLatency, 0x30060017, u16,
+  /// Accelerometer sensor data accuracy
+  AccelAcc, 0x30060018, u16,
+  /// IMU enabled
+  ImuEn, 0x1006001d, bool,
+  /// SCL PIO of the IMU I2C
+  ImuI2cSclPio, 0x2006001e, u8,
+  /// SDA PIO of the IMU I2C
+  ImuI2cSdaPio, 0x2006001f, u8,
+  /// Enable automatic IMU-mount alignment
+  ImuAutoMntAlg, 0x10060027, bool,
+  /// User-defined IMU-mount yaw angle [0, 36000]
+  ImuMntAlgYaw, 0x4006002d, u32,
+  /// User-defined IMU-mount pitch angle [-9000, 9000]
+  ImuMntAlgPitch, 0x3006002e, i16,
+  /// User-defined IMU-mount roll angle [-18000, 18000]
+  ImuMntAlgRoll, 0x3006002f, i16,
 
   // CFG-MSGOUT-*
   /// Output rate of the NMEA-GX-DTM message on port I2C
