@@ -404,6 +404,10 @@ cfg_val! {
   /// See section Priority navigation mode in the integration manual.
   RateNavPrio,           0x20210004, u8,
 
+  // Sensor Fusion Core config
+  /// Use ADR/UDR sensor fusion
+  UseSf, 0x10080001, bool,
+
   // Sensor Fusion Odometer CFG-SFODO-*
   /// Use odometer
   UseOdo, 0x10220001, bool,
@@ -457,6 +461,9 @@ cfg_val! {
   ImuMntAlgPitch, 0x3006002e, i16,
   /// User-defined IMU-mount roll angle [-18000, 18000]
   ImuMntAlgRoll, 0x3006002f, i16,
+
+  
+
 
   // CFG-MSGOUT-*
   /// Output rate of the NMEA-GX-DTM message on port I2C
