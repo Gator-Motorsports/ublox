@@ -1,4 +1,4 @@
-use super::{AlignmentToReferenceTime, CfgInfMask, DataBits, Parity, StopBits};
+use super::{AlignmentToReferenceTime, CfgInfMask, DataBits, Parity, StopBits, OdoProfile};
 
 pub struct KeyId(u32);
 
@@ -124,6 +124,17 @@ macro_rules! from_cfg_v_bytes {
             _ => unreachable!(),
         }
     };
+  // TODO: Make this work and replace OdoProfile with enum
+    ($buf:expr, OdoProfile) => {
+      match $buf[0] {
+          0 => OdoProfile::Running,
+          1 => OdoProfile::Cycling,
+          2 => OdoProfile::Swimming,
+          3 => OdoProfile::Car,
+          4 => OdoProfile::Custom,
+          _ => unreachable!(),
+      }
+  };
 }
 
 macro_rules! into_cfg_kv_bytes {
@@ -202,6 +213,12 @@ macro_rules! into_cfg_kv_bytes {
       ])
     };
     ($this:expr, TpPulseLength) => {
+      into_cfg_kv_bytes!(@inner [
+          $this.0 as u8
+      ])
+    };
+    // TODO: Make this work and replace OdoProfile with enum
+    ($this:expr, OdoProfile) => {
       into_cfg_kv_bytes!(@inner [
           $this.0 as u8
       ])
@@ -380,6 +397,73 @@ cfg_val! {
   RateNav,               0x30210002, u16,
   /// Time system to which measurements are aligned
   RateTimeref,           0x20210003, AlignmentToReferenceTime,
+  /// Output rate of priority navigation mode messages -- When not zero, the receiver outputs navigation data as a set of messages with two priority levels: 1) Priority messages: Navigation solution data are computed and output with high rate and low latency; 2) Non-priority messages auxiliary navigation data are computed and output with low rate and higher latency.
+  /// When zero, the receiver outputs the navigation data as a set of messages with the same priority.
+  /// The priority messages are: UBX-NAV-PVT, UBX-NAV-POSECEF, UBX-NAV-POSLLH, UBX-NAV-VELECEF, UBX-NAV-VELNED, UBX-NAV-HPPOSECEF, UBX-NAV-HPPOSLLH, UBX-ESF-INS, UBX-NAV-ATT, UBX-NAV-PVAT, NMEA-Standard-DTM, NMEA-Standard-RMC, NMEA-Standard-VTG, NMEA-Standard-GNS, NMEA-Standard-GGA, NMEA-Standard-GLL, NMEA-Standard-THS and NMEA-PUBX-POSITION. Note that some of these messages are not available on some products.
+  /// The allowed range for the priority navigation mode is 0-30 Hz.
+  /// See section Priority navigation mode in the integration manual.
+  RateNavPrio,           0x20210004, u8,
+
+  // Sensor Fusion Core config
+  /// Use ADR/UDR sensor fusion
+  UseSf, 0x10080001, bool,
+
+  // Sensor Fusion Odometer CFG-SFODO-*
+  /// Use odometer
+  UseOdo, 0x10220001, bool,
+  /// Use low-speed course over ground filter
+  UseCog, 0x10220002, bool,
+  /// Output low-pass filtered velocity
+  OutLpVel, 0x10220003, bool,
+  /// Output low-pass filtered course over ground (heading)
+  OutLpCog, 0x10220004, bool,
+  /// Odometer profile configuration
+  OdoProfileSet, 0x20220005, OdoProfile,
+  /// Upper speed limit for low-speed course over ground filter
+  CogMaxSpeed, 0x20220021, u8,
+  /// Maximum acceptable position accuracy for computing low-speed filtered course over ground
+  CogMaxPosAcc, 0x20220022, u8,
+  /// Velocity low-pass filter level -- Range is from 0 to 255.
+  VelLpGain, 0x20220031, u8,
+  /// Course over ground low-pass filter level (at speed < 8 m/s) -- Range is from 0 to 255.
+  CogLpGain, 0x20220032, u8,
+
+  // Sensor Fusion IMU configuration CFG-SFIMU-*
+  /// Time period between each update for the saved temperature-dependent gyroscope bias table
+  GyroTCUpdatePer, 0x30060007, u16,
+  /// Gyroscope sensor RMS threshold
+  GyroRmsThdl, 0x20060008, u8,
+  /// Nominal gyroscope sensor data sampling frequency
+  GyroFreq, 0x20060009, u8,
+  /// Gyroscope sensor data latency due to e.g. CANbus
+  GyroLatency, 0x3006000a, u16,
+  /// Gyroscope sensor data accuracy
+  GyroAcc, 0x3006000b, u16,
+  /// Accelerometer RMS threshold
+  AccelRmsThdl, 0x20060015, u8,
+  ///Nominal accelerometer sensor data sampling frequency
+  AccelFreq, 0x20060016, u8,
+  /// Accelerometer sensor data latency due to e.g. CAN bus
+  AccelLatency, 0x30060017, u16,
+  /// Accelerometer sensor data accuracy
+  AccelAcc, 0x30060018, u16,
+  /// IMU enabled
+  ImuEn, 0x1006001d, bool,
+  /// SCL PIO of the IMU I2C
+  ImuI2cSclPio, 0x2006001e, u8,
+  /// SDA PIO of the IMU I2C
+  ImuI2cSdaPio, 0x2006001f, u8,
+  /// Enable automatic IMU-mount alignment
+  ImuAutoMntAlg, 0x10060027, bool,
+  /// User-defined IMU-mount yaw angle [0, 36000]
+  ImuMntAlgYaw, 0x4006002d, u32,
+  /// User-defined IMU-mount pitch angle [-9000, 9000]
+  ImuMntAlgPitch, 0x3006002e, i16,
+  /// User-defined IMU-mount roll angle [-18000, 18000]
+  ImuMntAlgRoll, 0x3006002f, i16,
+
+  
+
 
   // CFG-MSGOUT-*
   /// Output rate of the NMEA-GX-DTM message on port I2C

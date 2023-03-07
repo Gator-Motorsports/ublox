@@ -242,6 +242,8 @@ bitflags! {
         const GPS_FIX_OK = 1;
         /// DGPS used
         const DIFF_SOLN = 2;
+        /// Power Save Mode State
+        const PSM_STATE = 4;
         /// 1 = heading of vehicle is valid
         const HEAD_VEH_VALID = 0x20;
         const CARR_SOLN_FLOAT = 0x40;
@@ -3029,7 +3031,7 @@ impl<'a> MonVerExtensionIter<'a> {
     }
 
     fn is_valid(payload: &[u8]) -> bool {
-        payload.len() % 30 == 0 && payload.chunks(30).any(|c| !is_cstr_valid(c))
+        payload.len() % 30 == 0 && payload.chunks(30).all(|c| is_cstr_valid(c))
     }
 }
 
